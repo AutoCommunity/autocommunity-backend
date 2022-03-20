@@ -1,0 +1,13 @@
+package com.autocommunity.backend;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class AutocommunityBackendApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(AutocommunityBackendApplication.class, args);
+    }
+
+}
