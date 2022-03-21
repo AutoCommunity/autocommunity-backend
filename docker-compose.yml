@@ -1,0 +1,16 @@
+services:
+  postgresql:
+    image: postgres:11-alpine
+    volumes:
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - postgresql_data:/var/lib/postgresql/data
+    command: -c max_connections=200
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+    restart: always
+
+volumes:
+  postgresql_data: {}
