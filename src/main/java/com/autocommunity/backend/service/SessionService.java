@@ -1,7 +1,7 @@
 package com.autocommunity.backend.service;
 
 import com.autocommunity.backend.entity.SessionEntity;
-import com.autocommunity.backend.entity.UserEntity;
+import com.autocommunity.backend.entity.User;
 import com.autocommunity.backend.repository.SessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,7 +17,7 @@ public class SessionService {
     private final long SESSION_DEFAULT_LIFETIME = TimeUnit.DAYS.toMillis(1);
 
 
-    public SessionEntity createSession(UserEntity user, String session) {
+    public SessionEntity createSession(User user, String session) {
         var sessionEntity = SessionEntity.builder()
             .session(session)
             .status(SessionEntity.Status.ACTIVE)
