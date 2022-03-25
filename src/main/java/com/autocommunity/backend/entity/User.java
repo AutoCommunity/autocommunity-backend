@@ -1,11 +1,7 @@
 package com.autocommunity.backend.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
@@ -13,22 +9,14 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
 
+@EqualsAndHashCode(callSuper = true)
 @Table(name = "\"user\"")
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserEntity {
-
-
-    @Id
-    @GeneratedValue(generator = "UUID")
-    @Column(name = "id")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @NotNull
-    @Size(max = 50)
-    private String id;
+public class User extends BaseEntity{
 
     @Column(name = "email")
     @NotNull
