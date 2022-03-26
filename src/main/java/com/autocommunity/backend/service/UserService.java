@@ -1,9 +1,11 @@
 package com.autocommunity.backend.service;
 
+import com.autocommunity.backend.entity.SessionEntity;
 import com.autocommunity.backend.entity.UserEntity;
 import com.autocommunity.backend.exception.AlreadyExistsException;
 import com.autocommunity.backend.exception.ValidationException;
 import com.autocommunity.backend.repository.UserRepository;
+import com.autocommunity.backend.util.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -12,14 +14,16 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final SessionService sessionService;
 
 
-    public Mono<UserEntity> registerUser(
+    public Mono<SessionEntity> registerUser(
         String email,
         String username,
         String password,
         String password2
     ) {
+        var sessionId = RandomUtils.randomBase64UUID();
         if (!password.equals(password2)) return Mono.error(
             new ValidationException("passwords don't match")
         );
@@ -38,7 +42,7 @@ public class UserService {
                 .passwordHash(password)
                 .build();
             userRepository.save(userEntity);
-            return userEntity;
+            return sessionService.createSession(userEntity, sessionId);
         });
 
     }
