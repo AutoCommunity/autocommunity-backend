@@ -30,12 +30,12 @@ public class UserEntity {
     @Size(max = 50)
     private String id;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     @NotNull
     @Size(max = 200)
     private String email;
 
-    @Column(name = "username")
+    @Column(name = "username", unique = true)
     @NotNull
     @Size(max = 50)
     private String username;
