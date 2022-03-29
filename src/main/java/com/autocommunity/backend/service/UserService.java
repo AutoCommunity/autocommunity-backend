@@ -1,7 +1,7 @@
 package com.autocommunity.backend.service;
 
 import com.autocommunity.backend.entity.SessionEntity;
-import com.autocommunity.backend.entity.User;
+import com.autocommunity.backend.entity.UserEntity;
 import com.autocommunity.backend.exception.AlreadyExistsException;
 import com.autocommunity.backend.exception.ValidationException;
 import com.autocommunity.backend.repository.UserRepository;
@@ -35,7 +35,7 @@ public class UserService {
                 })
 
         )).map(p -> {
-            var userEntity = User.builder()
+            var userEntity = UserEntity.builder()
                 .email(email)
                 .username(username)
                 //TODO: encode password

@@ -10,13 +10,13 @@ import javax.validation.constraints.Size;
 import java.util.Date;
 
 @EqualsAndHashCode(callSuper = true)
-@Table(name = "\"user\"")
+@Table(name = "users")
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class User extends BaseEntity{
+public class UserEntity extends BaseEntity{
 
     @Column(name = "email", unique = true)
     @NotNull
