@@ -14,7 +14,6 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final SessionService sessionService;
 
 
     public Mono<AbstractController.ReplyBase> registerUser(
