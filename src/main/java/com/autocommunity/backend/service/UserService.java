@@ -1,12 +1,12 @@
 package com.autocommunity.backend.service;
 
-import com.autocommunity.backend.entity.SessionEntity;
+import com.autocommunity.backend.Dto.UserDto;
 import com.autocommunity.backend.entity.UserEntity;
 import com.autocommunity.backend.exception.AlreadyExistsException;
-import com.autocommunity.backend.exception.ValidationException;
 import com.autocommunity.backend.repository.UserRepository;
-import com.autocommunity.backend.util.RandomUtils;
+import com.autocommunity.backend.web.AbstractController;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -14,35 +14,27 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final SessionService sessionService;
 
 
-    public Mono<SessionEntity> registerUser(
-        String email,
-        String username,
-        String password,
-        String password2
+    public Mono<AbstractController.ReplyBase> registerUser(
+        UserDto user
     ) {
-        var sessionId = RandomUtils.randomBase64UUID();
-        if (!password.equals(password2)) return Mono.error(
-            new ValidationException("passwords don't match")
-        );
 
         return Mono.defer(() -> Mono.just(
-            userRepository.findByEmailOrUsername(email, username)
-                .filter(user -> {
+            userRepository.findByEmailOrUsername(user.getEmail(), user.getUsername())
+                .filter(foundUser -> {
                     throw new AlreadyExistsException("User with that email or username already exists");
                 })
 
         )).map(p -> {
             var userEntity = UserEntity.builder()
-                .email(email)
-                .username(username)
+                .email(user.getEmail())
+                .username(user.getUsername())
                 //TODO: encode password
-                .passwordHash(password)
+                .password(new BCryptPasswordEncoder().encode(user.getPassword()))
                 .build();
             userRepository.save(userEntity);
-            return sessionService.createSession(userEntity, sessionId);
+            return AbstractController.ReplyBase.success("user registered");
         });
 
     }

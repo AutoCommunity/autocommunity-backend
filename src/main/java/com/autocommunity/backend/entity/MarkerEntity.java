@@ -20,6 +20,9 @@ public class MarkerEntity extends NamedEntity{
     @JoinColumn(name = "type_id")
     private MarkerType markerType;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "lat")
     @NotNull
     private double lat;

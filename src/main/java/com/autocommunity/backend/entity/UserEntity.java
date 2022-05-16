@@ -1,8 +1,10 @@
 package com.autocommunity.backend.entity;
 
+import com.autocommunity.backend.security.MyUserDetails;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -31,7 +33,7 @@ public class UserEntity extends BaseEntity{
     @Column(name = "password_hash")
     @NotNull
     @Size(max = 300)
-    private String passwordHash;
+    private String password;
 
     @Column(name = "created")
     @CreationTimestamp
@@ -40,4 +42,8 @@ public class UserEntity extends BaseEntity{
     @Column(name = "changed")
     @UpdateTimestamp
     private Date changed;
+
+    public UserDetails toUserDetails(){
+        return MyUserDetails.builder().username(username).password(password).build();
+    }
 }
