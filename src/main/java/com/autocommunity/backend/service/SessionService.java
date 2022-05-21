@@ -28,4 +28,13 @@ public class SessionService {
         sessionRepository.save(sessionEntity);
         return sessionEntity;
     }
+
+    public SessionEntity getSession(String session) {
+        var sessionEntity = sessionRepository.findBySession(session);
+        if (sessionEntity.isPresent() && sessionEntity.get().getExpirationTime().after(new Date())) {
+            return sessionEntity.get();
+        } else {
+            return null;
+        }
+    }
 }

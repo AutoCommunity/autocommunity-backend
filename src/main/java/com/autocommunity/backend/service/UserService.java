@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -44,6 +46,16 @@ public class UserService {
             userRepository.save(userEntity);
             return sessionService.createSession(userEntity, sessionId);
         });
+    }
 
+    public Mono<SessionEntity> loginUser(
+            String username,
+            String password
+    ) {
+        var sessionId = RandomUtils.randomBase64UUID();
+
+        return Mono.justOrEmpty(userRepository.findByEmailOrUsername(null, username))
+                .filter(userEntity -> Objects.equals(userEntity.getPasswordHash(), password))
+                .map(userEntity -> sessionService.createSession(userEntity, sessionId));
     }
 }
