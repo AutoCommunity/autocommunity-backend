@@ -1,37 +1,54 @@
 package com.autocommunity.backend.web;
 
 
-import com.autocommunity.backend.Dto.UserDto;
 import com.autocommunity.backend.service.UserService;
+import com.autocommunity.backend.util.AuthContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
 
-@RequestMapping(path = "/user", produces = "application/json")
+@RequestMapping(path = "/api/user", produces = "application/json")
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 public class UserController extends AbstractController {
     private final UserService userService;
+    private final AuthContext authContext;
+
 
     @PostMapping("/register")
     public Mono<ReplyBase> register(
-        @RequestBody @Valid UserDto user,
-        ServerWebExchange webExchange) {
-        return userService.registerUser(user);
+            @RequestParam("email") String email,
+            @RequestParam("username") String username,
+            @RequestParam("password") String password,
+            @RequestParam("password2") String password2,
+            ServerWebExchange webExchange
+    ) {
+        return userService.registerUser(email, username, password, password2)
+            .map(sessionEntity -> {
+                authContext.attach(webExchange, sessionEntity);
+                return ReplyBase.success("user registered");
+            });
     }
 
-    /*@PostMapping("/login")
+    @PostMapping("/login")
     public Mono<ReplyBase> login(
-        @RequestParam("username") String username,
-        @RequestParam("password") String password, ServerWebExchange webExchange) {
-        //TODO: user login
-        return Mono.empty();
-    }*/
+            @RequestParam("username") String username,
+            @RequestParam("password") String password,
+            ServerWebExchange webExchange
+    ) {
+        return userService.loginUser(username, password).map(sessionEntity ->
+        {
+            authContext.attach(webExchange, sessionEntity);
+            return ReplyBase.success("user logged in");
+        }).switchIfEmpty(Mono.just(ReplyBase.failure("user not found")));
+        // TODO: return ServerResponse.ok() or ServerResponse.badRequest()
+    }
 
 }

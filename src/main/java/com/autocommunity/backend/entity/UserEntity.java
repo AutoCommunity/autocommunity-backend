@@ -1,6 +1,5 @@
 package com.autocommunity.backend.entity;
 
-import com.autocommunity.backend.security.MyUserDetails;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -33,7 +32,7 @@ public class UserEntity extends BaseEntity{
     @Column(name = "password_hash")
     @NotNull
     @Size(max = 300)
-    private String password;
+    private String passwordHash;
 
     @Column(name = "created")
     @CreationTimestamp
@@ -42,8 +41,4 @@ public class UserEntity extends BaseEntity{
     @Column(name = "changed")
     @UpdateTimestamp
     private Date changed;
-
-    public UserDetails toUserDetails(){
-        return MyUserDetails.builder().username(username).password(password).build();
-    }
 }
