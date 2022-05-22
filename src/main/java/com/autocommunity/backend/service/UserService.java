@@ -3,14 +3,13 @@ package com.autocommunity.backend.service;
 import com.autocommunity.backend.entity.SessionEntity;
 import com.autocommunity.backend.entity.UserEntity;
 import com.autocommunity.backend.exception.AlreadyExistsException;
-import com.autocommunity.backend.exception.ValidationException;
+import com.autocommunity.backend.exception.IncorrectPasswordException;
+import com.autocommunity.backend.exception.UserNotFoundException;
 import com.autocommunity.backend.repository.UserRepository;
 import com.autocommunity.backend.util.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -20,42 +19,52 @@ public class UserService {
 
 
     public Mono<SessionEntity> registerUser(
-            String email,
-            String username,
-            String password,
-            String password2
+        String username,
+        String password
     ) {
         var sessionId = RandomUtils.randomBase64UUID();
-        if (!password.equals(password2)) return Mono.error(
-                new ValidationException("passwords don't match")
-        );
 
         return Mono.defer(() -> Mono.just(
-                userRepository.findByEmailOrUsername(email, username)
-                        .filter(user -> {
-                            throw new AlreadyExistsException("User with that email or username already exists");
-                        })
+            userRepository.findByUsername(username)
+                .filter(user -> {
+                    throw new AlreadyExistsException("User with that email or username already exists");
+                })
 
         )).map(p -> {
             var userEntity = UserEntity.builder()
-                    .email(email)
-                    .username(username)
-                    //TODO: encode password
-                    .passwordHash(password)
-                    .build();
+                .username(username)
+                //TODO: encode password
+                .passwordHash(password)
+                .build();
             userRepository.save(userEntity);
-            return sessionService.createSession(userEntity, sessionId);
+            var session = sessionService.createSession(userEntity, sessionId);
+            session.setFirstRegistration(Boolean.TRUE);
+            return session;
         });
     }
 
     public Mono<SessionEntity> loginUser(
-            String username,
-            String password
+        String username,
+        String password
     ) {
         var sessionId = RandomUtils.randomBase64UUID();
 
-        return Mono.justOrEmpty(userRepository.findByEmailOrUsername(null, username))
-                .filter(userEntity -> Objects.equals(userEntity.getPasswordHash(), password))
-                .map(userEntity -> sessionService.createSession(userEntity, sessionId));
+        return Mono.just(userRepository.findByUsername(username))
+            .flatMap(optionalUserEntity -> {
+                if (optionalUserEntity.isEmpty()) {
+                    return Mono.error(new UserNotFoundException("User not found."));
+                }
+                return Mono.just(optionalUserEntity.get());
+            })
+            .flatMap(userEntity -> {
+                if (userEntity.getPasswordHash().equals(password))
+                    return Mono.just(userEntity);
+                return Mono.error(new IncorrectPasswordException("Incorrect password."));
+            })
+            .map(userEntity -> sessionService.createSession(userEntity, sessionId))
+            .map(sessionEntity -> {
+                sessionEntity.setFirstRegistration(Boolean.FALSE);
+                return sessionEntity;
+            });
     }
 }
