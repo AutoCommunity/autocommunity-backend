@@ -2,27 +2,30 @@ package com.autocommunity.backend.entity;
 
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.UUID;
 
-@EqualsAndHashCode(callSuper = true)
-@Table(name = "users")
+@EqualsAndHashCode
+@Table(name = "user_t")
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserEntity extends BaseEntity{
+public class UserEntity {
 
-    @Column(name = "email", unique = true)
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @Column(name = "id")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @NotNull
-    @Size(max = 200)
-    private String email;
+    private UUID id;
 
     @Column(name = "username", unique = true)
     @NotNull

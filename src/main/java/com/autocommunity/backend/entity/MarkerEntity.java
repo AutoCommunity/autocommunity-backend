@@ -4,10 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.UUID;
 
 @Entity
 @Table(name = "marker")
@@ -15,9 +16,22 @@ import javax.validation.constraints.NotNull;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class MarkerEntity extends NamedEntity{
-    @ManyToOne
-    @JoinColumn(name = "type_id")
+public class MarkerEntity {
+
+    public enum MarkerType {
+        DUMMY_MARKER,
+    }
+
+
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @Column(name = "id")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @NotNull
+    private UUID id;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
     private MarkerType markerType;
 
     @Column(name = "name")
