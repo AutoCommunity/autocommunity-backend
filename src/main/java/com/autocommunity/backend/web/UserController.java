@@ -8,18 +8,14 @@ import com.autocommunity.backend.util.AuthContext;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 
-
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials="true")
 @RequestMapping(path = "/api/user", produces = "application/json")
 @RestController
 @RequiredArgsConstructor
@@ -31,10 +27,10 @@ public class UserController extends AbstractController {
 
     @PostMapping("/auth")
     public Mono<ReplyBase> auth(@RequestBody @Valid AuthRequest request, ServerWebExchange webExchange) {
-        return userService.loginUser(request.getLogin(), request.getPassword())
+        return userService.loginUser(request.getUsername(), request.getPassword())
             .onErrorResume(
                 UserNotFoundException.class,
-                notUsed -> userService.registerUser(request.getLogin(), request.getPassword())
+                notUsed -> userService.registerUser(request.getUsername(), request.getPassword())
             )
             .map(sessionEntity -> {
                 authContext.attach(webExchange, sessionEntity);
@@ -53,7 +49,7 @@ public class UserController extends AbstractController {
     @RequiredArgsConstructor
     public static class AuthRequest {
         @NotBlank
-        private final String login;
+        private final String username;
         @NotBlank
         private final String password;
     }

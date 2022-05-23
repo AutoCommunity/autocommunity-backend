@@ -3,20 +3,17 @@ package com.autocommunity.backend.web;
 
 import com.autocommunity.backend.entity.MarkerEntity;
 import com.autocommunity.backend.repository.MarkerRepository;
-import com.autocommunity.backend.service.UserService;
-import lombok.AllArgsConstructor;
+import com.autocommunity.backend.service.SessionService;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -40,8 +37,9 @@ public class MarkerController extends AbstractController {
         @NotNull
         private final double lng;
     }
-    @Autowired
-    private MarkerRepository markerRepository;
+    private final MarkerRepository markerRepository;
+
+    private final SessionService sessionService;
 
     @GetMapping(path = "/get", produces = "application/json")
     public Flux<MarkerDTO> getMarkers() {
@@ -55,8 +53,13 @@ public class MarkerController extends AbstractController {
     }
 
     @PostMapping(path = "/add")
+    @CrossOrigin(allowCredentials = "true")
     public Mono<ReplyBase> addMarker(@RequestBody @Valid MarkerDTO marker, ServerWebExchange webExchange){
-        System.out.println(marker.getName() + " " + marker.getLat() + " " + marker.getLng());
+        if (webExchange.getRequest().getCookies().get("SESSION") == null ||
+            webExchange.getRequest().getCookies().get("SESSION").size() < 1 ||
+            sessionService.getSession(webExchange.getRequest().getCookies().get("SESSION").get(0).getValue()) == null) {
+            return Mono.just(ReplyBase.failure("unauthenticated"));
+        }
         var markerEntity = MarkerEntity.builder()
                 .name(marker.getName())
                 .lat(marker.getLat())
