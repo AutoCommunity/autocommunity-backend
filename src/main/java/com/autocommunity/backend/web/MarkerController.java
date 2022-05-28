@@ -3,6 +3,7 @@ package com.autocommunity.backend.web;
 
 import com.autocommunity.backend.entity.MarkerEntity;
 import com.autocommunity.backend.repository.MarkerRepository;
+import com.autocommunity.backend.service.MarkerService;
 import com.autocommunity.backend.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,30 +41,27 @@ public class MarkerController extends AbstractController {
         @NotNull
         private final double lng;
     }
-    @Autowired
-    private MarkerRepository markerRepository;
+
+    private final MarkerService markerService;
 
     @GetMapping(path = "/get", produces = "application/json")
     public Flux<MarkerDTO> getMarkers() {
-        return Flux.fromIterable(markerRepository.findAll()).map(markerEntity ->
-                MarkerDTO.builder()
-                        .name(markerEntity.getName())
-                        .lat(markerEntity.getLat())
-                        .lng(markerEntity.getLng())
-                        .markerType(markerEntity.getMarkerType())
-                        .build());
+        return markerService.getMarkers().map(markerEntity ->
+            MarkerDTO.builder()
+                .name(markerEntity.getName())
+                .lat(markerEntity.getLat())
+                .lng(markerEntity.getLng())
+                .markerType(markerEntity.getMarkerType())
+                .build()
+        );
     }
 
     @PostMapping(path = "/add")
-    public Mono<ReplyBase> addMarker(@RequestBody @Valid MarkerDTO marker, ServerWebExchange webExchange){
-        System.out.println(marker.getName() + " " + marker.getLat() + " " + marker.getLng());
-        var markerEntity = MarkerEntity.builder()
-                .name(marker.getName())
-                .lat(marker.getLat())
-                .lng(marker.getLng())
-                .markerType(marker.getMarkerType())
-                .build();
-        markerRepository.save(markerEntity);
+    public Mono<ReplyBase> addMarker(@RequestBody @Valid MarkerDTO marker, ServerWebExchange webExchange) {
+        log.info("marker name: {}, lat: {}, lng: {}", marker.getName(), marker.getLat(), marker.getLng());
+
+        markerService.addMarker(marker.getName(), marker.getLat(), marker.getLng(), marker.getMarkerType());
+
         return Mono.just(ReplyBase.success("marker added"));
     }
 
