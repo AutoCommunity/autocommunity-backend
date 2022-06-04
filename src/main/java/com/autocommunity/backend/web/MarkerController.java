@@ -24,19 +24,6 @@ import javax.validation.constraints.NotNull;
 @Slf4j
 public class MarkerController extends AbstractController {
 
-    @RequiredArgsConstructor
-    @Getter
-    @Builder
-    private static class MarkerDTO {
-        @NotEmpty
-        private final String name;
-        @NotNull
-        private final MarkerEntity.MarkerType markerType;
-        @NotNull
-        private final double lat;
-        @NotNull
-        private final double lng;
-    }
     private final MarkerRepository markerRepository;
 
     private final SessionService sessionService;
@@ -55,19 +42,33 @@ public class MarkerController extends AbstractController {
     @PostMapping(path = "/add")
     @CrossOrigin(allowCredentials = "true")
     public Mono<ReplyBase> addMarker(@RequestBody @Valid MarkerDTO marker, ServerWebExchange webExchange){
-        if (webExchange.getRequest().getCookies().get("SESSION") == null ||
-            webExchange.getRequest().getCookies().get("SESSION").size() < 1 ||
-            sessionService.getSession(webExchange.getRequest().getCookies().get("SESSION").get(0).getValue()) == null) {
-            return Mono.just(ReplyBase.failure("unauthenticated"));
-        }
-        var markerEntity = MarkerEntity.builder()
-                .name(marker.getName())
-                .lat(marker.getLat())
-                .lng(marker.getLng())
-                .markerType(marker.getMarkerType())
-                .build();
-        markerRepository.save(markerEntity);
-        return Mono.just(ReplyBase.success("marker added"));
+        return sessionService.isUserAuthorised(webExchange)
+            .then(
+                Mono.defer(() -> {
+                    var markerEntity = MarkerEntity.builder()
+                        .name(marker.getName())
+                        .lat(marker.getLat())
+                        .lng(marker.getLng())
+                        .markerType(marker.getMarkerType())
+                        .build();
+                    markerRepository.save(markerEntity);
+                    return Mono.just(ReplyBase.success("marker added"));
+                }
+            ));
+    }
+
+    @RequiredArgsConstructor
+    @Getter
+    @Builder
+    private static class MarkerDTO {
+        @NotEmpty
+        private final String name;
+        @NotNull
+        private final MarkerEntity.MarkerType markerType;
+        @NotNull
+        private final double lat;
+        @NotNull
+        private final double lng;
     }
 
 }
