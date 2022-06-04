@@ -2,14 +2,13 @@ package com.autocommunity.backend.web;
 
 
 import com.autocommunity.backend.entity.SessionEntity;
-import com.autocommunity.backend.exception.AlreadyExistsException;
-import com.autocommunity.backend.exception.IncorrectPasswordException;
 import com.autocommunity.backend.exception.UserNotFoundException;
 import com.autocommunity.backend.service.UserService;
 import com.autocommunity.backend.util.AuthContext;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +32,7 @@ public class UserController extends AbstractController {
     @PostMapping("/auth")
     public Mono<ReplyBase> auth(@RequestBody @Valid AuthRequest request, ServerWebExchange webExchange) {
         try {
-            var session = loginOrRegister(request.getLogin(), request.getPassword());
+            var session = loginOrRegister(request.getUsername(), request.getPassword());
             authContext.attach(webExchange, session);
             return Mono.just(
                 session.getFirstRegistration() ?

@@ -27,8 +27,7 @@ import javax.validation.constraints.NotNull;
 @Slf4j
 public class MarkerController extends AbstractController {
 
-    private final MarkerRepository markerRepository;
-
+    private final MarkerService markerService;
     private final SessionService sessionService;
 
     @GetMapping(path = "/get", produces = "application/json")
@@ -49,13 +48,7 @@ public class MarkerController extends AbstractController {
         return sessionService.isUserAuthorised(webExchange)
             .then(
                 Mono.defer(() -> {
-                    var markerEntity = MarkerEntity.builder()
-                        .name(marker.getName())
-                        .lat(marker.getLat())
-                        .lng(marker.getLng())
-                        .markerType(marker.getMarkerType())
-                        .build();
-                    markerRepository.save(markerEntity);
+                    markerService.addMarker(marker.getName(), marker.getLat(), marker.getLng(), marker.getMarkerType());
                     return Mono.just(ReplyBase.success("marker added"));
                 }
             ));
