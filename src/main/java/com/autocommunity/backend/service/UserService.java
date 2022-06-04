@@ -41,7 +41,7 @@ public class UserService {
         return session;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(rollbackFor = Throwable.class)
     public SessionEntity loginUser(
         String username,
         String password
