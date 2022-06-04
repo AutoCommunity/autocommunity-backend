@@ -18,6 +18,8 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials="true")
 @RequestMapping(path = "/api/user", produces = "application/json")
@@ -31,17 +33,14 @@ public class UserController extends AbstractController {
 
     @PostMapping("/auth")
     public Mono<ReplyBase> auth(@RequestBody @Valid AuthRequest request, ServerWebExchange webExchange) {
-        try {
-            var session = loginOrRegister(request.getUsername(), request.getPassword());
-            authContext.attach(webExchange, session);
-            return Mono.just(
+        return
+            Mono.just(loginOrRegister(request.getUsername(), request.getPassword()))
+            .doOnNext(session -> authContext.attach(webExchange, session))
+            .flatMap(session -> Mono.just(
                 session.getFirstRegistration() ?
                     ReplyBase.success("Successfully registered.") :
                     ReplyBase.success("Successfully logged in.")
-            );
-        } catch (RuntimeException e) {
-            return Mono.just(ReplyBase.failure(e.getMessage()));
-        }
+            ));
     }
 
     private SessionEntity loginOrRegister(String login, String password) {
@@ -56,7 +55,7 @@ public class UserController extends AbstractController {
     @Getter
     @RequiredArgsConstructor
     public static class AuthRequest {
-        @NotBlank
+        @Size(min = 1)
         private final String username;
         @NotBlank
         private final String password;

@@ -20,8 +20,5 @@ public class AbstractController {
         public static ReplyBase success(String message) {
             return new ReplyBase(message, STATUS_SUCCESS);
         }
-        public static ReplyBase failure(String message) {
-            return new ReplyBase(message, STATUS_FAILURE);
-        }
     }
 }
