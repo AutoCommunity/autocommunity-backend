@@ -2,11 +2,8 @@ package com.autocommunity.backend.web;
 
 
 import com.autocommunity.backend.entity.MarkerEntity;
-import com.autocommunity.backend.repository.MarkerRepository;
-import com.autocommunity.backend.service.SessionService;
 import com.autocommunity.backend.service.MarkerService;
-import com.autocommunity.backend.service.UserService;
-import lombok.AllArgsConstructor;
+import com.autocommunity.backend.util.AuthContext;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +25,7 @@ import javax.validation.constraints.NotNull;
 public class MarkerController extends AbstractController {
 
     private final MarkerService markerService;
-    private final SessionService sessionService;
+    private final AuthContext authContext;
 
     @GetMapping(path = "/get", produces = "application/json")
     public Flux<MarkerDTO> getMarkers() {
@@ -45,7 +42,7 @@ public class MarkerController extends AbstractController {
     @PostMapping(path = "/add")
     @CrossOrigin(allowCredentials = "true")
     public Mono<ReplyBase> addMarker(@RequestBody @Valid MarkerDTO marker, ServerWebExchange webExchange){
-        return sessionService.isUserAuthorised(webExchange)
+        return authContext.isUserAuthorised(webExchange)
             .then(
                 Mono.defer(() -> {
                     markerService.addMarker(marker.getName(), marker.getLat(), marker.getLng(), marker.getMarkerType());

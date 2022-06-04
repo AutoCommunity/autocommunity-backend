@@ -36,8 +36,8 @@ public class UserController extends AbstractController {
             authContext.attach(webExchange, session);
             return Mono.just(
                 session.getFirstRegistration() ?
-                    ReplyBase.success("Successfully logged in.") :
-                    ReplyBase.success("Successfully registered.")
+                    ReplyBase.success("Successfully registered.") :
+                    ReplyBase.success("Successfully logged in.")
             );
         } catch (RuntimeException e) {
             return Mono.just(ReplyBase.failure(e.getMessage()));
