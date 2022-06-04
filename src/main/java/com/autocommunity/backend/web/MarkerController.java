@@ -4,6 +4,9 @@ package com.autocommunity.backend.web;
 import com.autocommunity.backend.entity.MarkerEntity;
 import com.autocommunity.backend.repository.MarkerRepository;
 import com.autocommunity.backend.service.SessionService;
+import com.autocommunity.backend.service.MarkerService;
+import com.autocommunity.backend.service.UserService;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -30,13 +33,14 @@ public class MarkerController extends AbstractController {
 
     @GetMapping(path = "/get", produces = "application/json")
     public Flux<MarkerDTO> getMarkers() {
-        return Flux.fromIterable(markerRepository.findAll()).map(markerEntity ->
-                MarkerDTO.builder()
-                        .name(markerEntity.getName())
-                        .lat(markerEntity.getLat())
-                        .lng(markerEntity.getLng())
-                        .markerType(markerEntity.getMarkerType())
-                        .build());
+        return markerService.getMarkers().map(markerEntity ->
+            MarkerDTO.builder()
+                .name(markerEntity.getName())
+                .lat(markerEntity.getLat())
+                .lng(markerEntity.getLng())
+                .markerType(markerEntity.getMarkerType())
+                .build()
+        );
     }
 
     @PostMapping(path = "/add")
