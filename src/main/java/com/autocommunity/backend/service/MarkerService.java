@@ -1,7 +1,7 @@
 package com.autocommunity.backend.service;
 
 
-import com.autocommunity.backend.entity.MarkerEntity;
+import com.autocommunity.backend.entity.map.MarkerEntity;
 import com.autocommunity.backend.repository.MarkerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,6 +1,6 @@
 package com.autocommunity.backend.repository;
 
-import com.autocommunity.backend.entity.UserEntity;
+import com.autocommunity.backend.entity.user.UserEntity;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;

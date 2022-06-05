@@ -1,7 +1,7 @@
 package com.autocommunity.backend.web;
 
 
-import com.autocommunity.backend.entity.MarkerEntity;
+import com.autocommunity.backend.entity.map.MarkerEntity;
 import com.autocommunity.backend.service.MarkerService;
 import com.autocommunity.backend.util.AuthContext;
 import lombok.Builder;
