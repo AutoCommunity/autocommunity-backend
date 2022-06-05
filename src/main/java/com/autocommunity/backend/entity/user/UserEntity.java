@@ -1,4 +1,4 @@
-package com.autocommunity.backend.entity;
+package com.autocommunity.backend.entity.user;
 
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

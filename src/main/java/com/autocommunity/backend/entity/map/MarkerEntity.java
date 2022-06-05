@@ -1,4 +1,4 @@
-package com.autocommunity.backend.entity;
+package com.autocommunity.backend.entity.map;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

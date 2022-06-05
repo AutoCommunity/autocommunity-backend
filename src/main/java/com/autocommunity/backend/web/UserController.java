@@ -1,8 +1,9 @@
 package com.autocommunity.backend.web;
 
 
-import com.autocommunity.backend.entity.SessionEntity;
+import com.autocommunity.backend.entity.user.SessionEntity;
 import com.autocommunity.backend.exception.UserNotFoundException;
+import com.autocommunity.backend.service.SessionService;
 import com.autocommunity.backend.service.UserService;
 import com.autocommunity.backend.util.AuthContext;
 import lombok.Getter;
@@ -18,7 +19,6 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials="true")
@@ -29,6 +29,7 @@ import javax.validation.constraints.Size;
 public class UserController extends AbstractController {
     private final UserService userService;
     private final AuthContext authContext;
+    private final SessionService sessionService;
 
 
     @PostMapping("/auth")
@@ -41,6 +42,18 @@ public class UserController extends AbstractController {
                     ReplyBase.success("Successfully registered.") :
                     ReplyBase.success("Successfully logged in.")
             ));
+    }
+
+    @PostMapping("/logout")
+    public Mono<ReplyBase> logout(ServerWebExchange webExchange) {
+        return
+            authContext.isUserAuthorised(webExchange)
+                .doOnNext(session -> userService.logoutUser(session.getUser()))
+                .doOnNext(session -> {
+                    session.setExpirationTime(session.getCreationTime()); // set ttl to 0
+                    authContext.attach(webExchange, session);
+                })
+                .then(Mono.just(ReplyBase.success("Successfully logged out.")));
     }
 
     private SessionEntity loginOrRegister(String login, String password) {

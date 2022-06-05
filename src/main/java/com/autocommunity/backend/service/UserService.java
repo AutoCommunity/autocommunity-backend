@@ -1,7 +1,7 @@
 package com.autocommunity.backend.service;
 
-import com.autocommunity.backend.entity.SessionEntity;
-import com.autocommunity.backend.entity.UserEntity;
+import com.autocommunity.backend.entity.user.SessionEntity;
+import com.autocommunity.backend.entity.user.UserEntity;
 import com.autocommunity.backend.exception.AlreadyExistsException;
 import com.autocommunity.backend.exception.IncorrectPasswordException;
 import com.autocommunity.backend.exception.UserNotFoundException;
@@ -10,7 +10,6 @@ import com.autocommunity.backend.util.RandomUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Mono;
 
 @Service
 @RequiredArgsConstructor
@@ -57,4 +56,11 @@ public class UserService {
         session.setFirstRegistration(Boolean.FALSE);
         return session;
     }
+
+    @Transactional(rollbackFor = Throwable.class)
+    public void logoutUser(UserEntity user) {
+        sessionService.getActiveSessions(user)
+            .forEach(sessionService::terminateSession);
+    }
+
 }

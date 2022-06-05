@@ -1,4 +1,4 @@
-package com.autocommunity.backend.entity;
+package com.autocommunity.backend.entity.user;
 
 
 import lombok.*;
@@ -33,6 +33,11 @@ public class SessionEntity {
     public enum Status {
         ACTIVE,
         EXPIRED,
+    }
+
+    @Transient
+    public boolean isExpired() {
+        return expirationTime.compareTo(new Date()) < 0;
     }
 
     @Id
