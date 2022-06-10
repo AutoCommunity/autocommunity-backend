@@ -6,10 +6,12 @@ import com.autocommunity.backend.exception.NotFoundException;
 import com.autocommunity.backend.service.SessionService;
 import com.autocommunity.backend.service.UserService;
 import com.autocommunity.backend.util.AuthContext;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -56,6 +58,14 @@ public class UserController extends AbstractController {
                 .then(Mono.just(ReplyBase.success("Successfully logged out.")));
     }
 
+    @GetMapping(path = "/config", produces = "application/json")
+    public Mono<UserConfigDTO> getUserConfig(ServerWebExchange webExchange) {
+        return authContext.isUserAuthorised(webExchange)
+            .map(SessionEntity::getUser)
+            .map(user -> UserConfigDTO.builder()
+                .username(user.getUsername()).build());
+    }
+
     private SessionEntity loginOrRegister(String login, String password) {
         try {
             return userService.loginUser(login, password);
@@ -72,6 +82,14 @@ public class UserController extends AbstractController {
         private final String username;
         @NotBlank
         private final String password;
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    @Builder
+    public static class UserConfigDTO {
+        @Size(min = 1)
+        private final String username;
     }
 
 }
