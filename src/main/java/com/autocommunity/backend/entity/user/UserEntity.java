@@ -1,5 +1,6 @@
 package com.autocommunity.backend.entity.user;
 
+import com.autocommunity.backend.entity.map.EventEntity;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
@@ -9,6 +10,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @EqualsAndHashCode
@@ -44,4 +47,9 @@ public class UserEntity {
     @Column(name = "changed")
     @UpdateTimestamp
     private Date changed;
+
+
+    @ManyToMany(fetch = FetchType.EAGER,
+    mappedBy = "eventVisitors")
+    private Set<EventEntity> events = new HashSet<>();
 }

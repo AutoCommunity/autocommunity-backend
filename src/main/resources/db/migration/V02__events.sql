@@ -17,17 +17,15 @@ ALTER TABLE event
     ADD CONSTRAINT FK_EVENT_ON_OWNER FOREIGN KEY (owner_id) REFERENCES user_t (id) ON DELETE CASCADE;
 
 
-
 CREATE TABLE event_visitor
 (
-    id       UUID NOT NULL,
-    user_id  UUID,
-    event_id UUID,
-    CONSTRAINT pk_event_visitor PRIMARY KEY (id)
+    event_visitors_id UUID NOT NULL,
+    events_id         UUID NOT NULL,
+    CONSTRAINT pk_event_visitor PRIMARY KEY (event_visitors_id, events_id)
 );
 
 ALTER TABLE event_visitor
-    ADD CONSTRAINT FK_EVENT_VISITOR_ON_EVENT FOREIGN KEY (event_id) REFERENCES event (id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_evevis_on_event_entity FOREIGN KEY (events_id) REFERENCES event (id);
 
 ALTER TABLE event_visitor
-    ADD CONSTRAINT FK_EVENT_VISITOR_ON_USER FOREIGN KEY (user_id) REFERENCES user_t (id) ON DELETE CASCADE;
+    ADD CONSTRAINT fk_evevis_on_user_entity FOREIGN KEY (event_visitors_id) REFERENCES user_t (id);
