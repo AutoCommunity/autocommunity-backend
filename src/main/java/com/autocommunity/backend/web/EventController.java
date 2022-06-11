@@ -1,17 +1,13 @@
 package com.autocommunity.backend.web;
 
 
+import com.autocommunity.backend.entity.map.EventEntity;
 import com.autocommunity.backend.service.EventService;
 import com.autocommunity.backend.service.MarkerService;
 import com.autocommunity.backend.util.AuthContext;
 import com.autocommunity.backend.util.UUIDUtils;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -44,16 +41,7 @@ public class EventController extends AbstractController {
     @GetMapping(path = "/all")
     public Flux<EventDTO> getAllEvents() {
         return Flux.fromStream(eventService.getAllEvents().stream())
-            .map(event ->
-                EventDTO.builder()
-                    .id(event.getId().toString())
-                    .startDate(event.getStartDate())
-                    .endDate(event.getEndDate())
-                    .lat(event.getMarker().getLat())
-                    .lng(event.getMarker().getLng())
-                    .ownerId(event.getOwner().getId().toString())
-                    .build()
-            );
+            .map(EventController::entityToDTO);
     }
 
     @PostMapping(path = "/create")
@@ -64,11 +52,21 @@ public class EventController extends AbstractController {
                     () -> Mono.just(eventService.createEvent(
                         markerService.getMarkerById(UUIDUtils.parseUUID(request.getMarkerId())),
                         session.getUser(),
+                        request.getName(),
+                        request.getDescription(),
+                        request.getStartDate(),
+                        request.getEndDate(),
                         request.getPrivacyType()
                     ))
                 )
             )
             .map(eventEntity -> new CreateEventReply(eventEntity.getId().toString()));
+    }
+
+    @GetMapping(path = "/get/marker")
+    public Flux<EventDTO> getPublicEventsByMarker(@RequestParam String markerId, ServerWebExchange webExchange) {
+        return eventService.getPublicEventsByMarker(UUIDUtils.parseUUID(markerId))
+            .map(EventController::entityToDTO);
     }
 
     @PostMapping("/delete")
@@ -98,11 +96,11 @@ public class EventController extends AbstractController {
     @Builder
     public static class EventDTO {
         private final String id;
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm a z")
+        private final String name;
+        private final String description;
         private final Date startDate;
         private final Date endDate;
-        private final double lat;
-        private final double lng;
+        private final String markerId;
         private final String ownerId;
     }
 
@@ -113,6 +111,14 @@ public class EventController extends AbstractController {
         private final String markerId;
         @NotEmpty
         private final String privacyType;
+
+        @NotEmpty
+        private final String name;
+        private final String description;
+
+        private final Date startDate;
+
+        private final Date endDate;
     }
 
     @Getter
@@ -135,6 +141,18 @@ public class EventController extends AbstractController {
     public static class AddVisitorsRequest {
         @NotEmpty
         private final List<String> visitorIds;
+    }
+
+    private static EventDTO entityToDTO(EventEntity event) {
+        return EventDTO.builder()
+            .id(event.getId().toString())
+            .startDate(event.getStartDate())
+            .endDate(event.getEndDate())
+            .markerId(event.getMarker().getId().toString())
+            .ownerId(event.getOwner().getId().toString())
+            .name(event.getName())
+            .description(event.getDescription())
+            .build();
     }
 
 }

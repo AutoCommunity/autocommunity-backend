@@ -9,6 +9,7 @@ import com.autocommunity.backend.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 
 import java.util.Date;
 import java.util.List;
@@ -31,15 +32,17 @@ public class EventService {
     }
 
     @Transactional(rollbackFor = Throwable.class)
-    public EventEntity createEvent(MarkerEntity baseMarker, UserEntity user, String privacyType) {
+    public EventEntity createEvent(MarkerEntity baseMarker, UserEntity user, String name, String description, Date startDate, Date endDate, String privacyType) {
         try {
             var event = EventEntity.builder()
                 .marker(baseMarker)
                 .owner(user)
-                .startDate(new Date())
-                .endDate(new Date())
+                .startDate(startDate)
+                .endDate(endDate)
                 .status(EventEntity.Status.NOT_STARTED)
                 .privacyType(EventEntity.PrivacyType.valueOf(privacyType))
+                .name(name)
+                .description(description)
                 .build();
             return eventRepository.save(event);
         } catch (RuntimeException e) {
@@ -54,6 +57,11 @@ public class EventService {
         }
         event.setStatus(EventEntity.Status.DELETED);
         eventRepository.save(event);
+    }
+
+    @Transactional(readOnly = true)
+    public Flux<EventEntity> getPublicEventsByMarker(UUID markerId) {
+        return Flux.fromIterable(eventRepository.findByMarkerIdAndPrivacyType(markerId, EventEntity.PrivacyType.PUBLIC));
     }
 
 }
