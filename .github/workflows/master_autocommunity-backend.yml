@@ -20,9 +20,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '11'
+          cache: 'gradle'
 
-      - name: Build with Maven
-        run: ./gradle build
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
