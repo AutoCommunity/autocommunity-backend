@@ -23,7 +23,7 @@ jobs:
           cache: 'gradle'
 
       - name: Build with Gradle
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build --no-daemon -x test
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
