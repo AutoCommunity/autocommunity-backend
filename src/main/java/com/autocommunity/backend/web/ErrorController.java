@@ -1,9 +1,7 @@
 package com.autocommunity.backend.web;
 
-import com.autocommunity.backend.exception.AlreadyExistsException;
-import com.autocommunity.backend.exception.IncorrectPasswordException;
+import com.autocommunity.backend.exception.BadRequestException;
 import com.autocommunity.backend.exception.UnauthenticatedException;
-import com.autocommunity.backend.exception.UserNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +17,8 @@ import java.util.Optional;
 public class ErrorController extends AbstractController {
     @ExceptionHandler({RuntimeException.class})
     public ResponseEntity<String> responseStatusException(RuntimeException e) {
-        log.info("here");
         e.printStackTrace();
-        if (e instanceof AlreadyExistsException) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-        else if (e instanceof IncorrectPasswordException) {
+        if (e instanceof BadRequestException) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
         else if (e instanceof UnauthenticatedException) {
@@ -37,7 +31,7 @@ public class ErrorController extends AbstractController {
             var exc = ((WebExchangeBindException)e);
             var errorMsg = Optional.ofNullable(exc.getFieldError())
                 .map(fieldError -> fieldError.getField() + " " + fieldError.getDefaultMessage())
-                .orElseGet(() -> "Validation error");
+                .orElse("Validation error");
             return ResponseEntity.badRequest().body(errorMsg);
         }
         else {
