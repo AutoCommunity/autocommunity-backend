@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.List;
 
 @Slf4j
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials="true")
 @RequestMapping(path = "/api/event", produces = "application/json")
 @RequiredArgsConstructor
 @RestController
