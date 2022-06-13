@@ -19,7 +19,12 @@ import java.util.UUID;
 public class MarkerEntity {
 
     public enum MarkerType {
-        DUMMY_MARKER,
+        GAS_STATION,
+        CAR_WASH,
+        SERVICE_STATION,
+        DRIFT,
+        DRAG_RACING,
+        OTHER
     }
 
 
