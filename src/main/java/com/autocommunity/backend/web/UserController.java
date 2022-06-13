@@ -2,7 +2,7 @@ package com.autocommunity.backend.web;
 
 
 import com.autocommunity.backend.entity.user.SessionEntity;
-import com.autocommunity.backend.exception.UserNotFoundException;
+import com.autocommunity.backend.exception.NotFoundException;
 import com.autocommunity.backend.service.SessionService;
 import com.autocommunity.backend.service.UserService;
 import com.autocommunity.backend.util.AuthContext;
@@ -23,7 +23,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-@CrossOrigin(origins = "http://localhost:3000", allowCredentials="true")
+@CrossOrigin(originPatterns = "*", allowCredentials="true")
 @RequestMapping(path = "/api/user", produces = "application/json")
 @RestController
 @RequiredArgsConstructor
@@ -69,7 +69,7 @@ public class UserController extends AbstractController {
     private SessionEntity loginOrRegister(String login, String password) {
         try {
             return userService.loginUser(login, password);
-        } catch (UserNotFoundException e) {
+        } catch (NotFoundException e) {
             return userService.registerUser(login, password);
         }
     }

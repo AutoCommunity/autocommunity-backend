@@ -17,7 +17,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping(path = "/api/markers")
 @RestController
 @RequiredArgsConstructor
@@ -31,6 +30,7 @@ public class MarkerController extends AbstractController {
     public Flux<MarkerDTO> getMarkers() {
         return markerService.getMarkers().map(markerEntity ->
             MarkerDTO.builder()
+                .id(markerEntity.getId().toString())
                 .name(markerEntity.getName())
                 .lat(markerEntity.getLat())
                 .lng(markerEntity.getLng())
@@ -41,7 +41,7 @@ public class MarkerController extends AbstractController {
 
     @PostMapping(path = "/add")
     @CrossOrigin(allowCredentials = "true")
-    public Mono<ReplyBase> addMarker(@RequestBody @Valid MarkerDTO marker, ServerWebExchange webExchange){
+    public Mono<ReplyBase> addMarker(@RequestBody @Valid CreateMarkerRequest marker, ServerWebExchange webExchange){
         return authContext.isUserAuthorised(webExchange)
             .then(
                 Mono.defer(() -> {
@@ -51,10 +51,25 @@ public class MarkerController extends AbstractController {
             ));
     }
 
+    @Getter
+    @RequiredArgsConstructor
+    public static class CreateMarkerRequest {
+        @NotEmpty
+        private final String name;
+        @NotNull
+        private final MarkerEntity.MarkerType markerType;
+        @NotNull
+        private final double lat;
+        @NotNull
+        private final double lng;
+    }
+
     @RequiredArgsConstructor
     @Getter
     @Builder
     private static class MarkerDTO {
+        @NotNull
+        private final String id;
         @NotEmpty
         private final String name;
         @NotNull
