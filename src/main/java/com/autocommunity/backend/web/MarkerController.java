@@ -40,7 +40,6 @@ public class MarkerController extends AbstractController {
     }
 
     @PostMapping(path = "/add")
-    @CrossOrigin(allowCredentials = "true")
     public Mono<ReplyBase> addMarker(@RequestBody @Valid CreateMarkerRequest marker, ServerWebExchange webExchange){
         return authContext.isUserAuthorised(webExchange)
             .then(
