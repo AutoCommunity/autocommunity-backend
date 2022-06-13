@@ -23,7 +23,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-@CrossOrigin(allowCredentials="true")
+@CrossOrigin(originPatterns = "*", allowCredentials="true")
 @RequestMapping(path = "/api/user", produces = "application/json")
 @RestController
 @RequiredArgsConstructor
