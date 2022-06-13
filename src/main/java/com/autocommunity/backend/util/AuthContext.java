@@ -26,6 +26,7 @@ public class AuthContext {
                     .secure(false)
                     .httpOnly(true)
                     .sameSite("None")
+                    .secure(true)
                     .build()
         );
     }
