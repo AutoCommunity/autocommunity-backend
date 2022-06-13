@@ -17,7 +17,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping(path = "/api/markers")
 @RestController
 @RequiredArgsConstructor
