@@ -21,11 +21,12 @@ public class AuthContext {
     public void attach(ServerWebExchange webExchange, SessionEntity session) {
         webExchange.getResponse().addCookie(
                 ResponseCookie.from(SESSION_COOKIE_NAME, session.getSession())
-                        .maxAge(Duration.ofMillis(session.getExpirationTime().getTime() - session.getCreationTime().getTime()).toSeconds())
-                        .path("/")
-                        .secure(false)
-                        .httpOnly(true)
-                        .build()
+                    .maxAge(Duration.ofMillis(session.getExpirationTime().getTime() - session.getCreationTime().getTime()).toSeconds())
+                    .path("/")
+                    .secure(false)
+                    .httpOnly(true)
+                    .sameSite("None")
+                    .build()
         );
     }
 
