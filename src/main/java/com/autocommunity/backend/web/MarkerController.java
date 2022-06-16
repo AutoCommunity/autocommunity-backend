@@ -2,12 +2,16 @@ package com.autocommunity.backend.web;
 
 
 import com.autocommunity.backend.entity.map.MarkerEntity;
+import com.autocommunity.backend.entity.map.MarkerRateEntity;
+import com.autocommunity.backend.exception.NotFoundException;
 import com.autocommunity.backend.service.MarkerService;
 import com.autocommunity.backend.util.AuthContext;
+import com.autocommunity.backend.util.UUIDUtils;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -35,12 +39,13 @@ public class MarkerController extends AbstractController {
                 .lat(markerEntity.getLat())
                 .lng(markerEntity.getLng())
                 .markerType(markerEntity.getMarkerType())
+                .rate(markerEntity.getRates().stream().mapToDouble(MarkerRateEntity::getRate).average().orElse(0))
                 .build()
         );
     }
 
     @PostMapping(path = "/add")
-    public Mono<ReplyBase> addMarker(@RequestBody @Valid CreateMarkerRequest marker, ServerWebExchange webExchange){
+    public Mono<ReplyBase> addMarker(@RequestBody @Valid CreateMarkerRequest marker, ServerWebExchange webExchange) {
         return authContext.isUserAuthorised(webExchange)
             .then(
                 Mono.defer(() -> {
@@ -48,6 +53,40 @@ public class MarkerController extends AbstractController {
                     return Mono.just(ReplyBase.success("marker added"));
                 }
             ));
+    }
+
+    @PostMapping(path = "/rate")
+    public Mono<ReplyBase> rateMarker(@RequestBody @Valid RateRequest rateRequest, ServerWebExchange webExchange) {
+        return authContext.isUserAuthorised(webExchange)
+            .flatMap(session ->
+                Mono.defer(
+                    () -> {
+                        try {
+                            markerService.updateRate(
+                                markerService.getRate(
+                                    markerService.getMarkerById(UUIDUtils.parseUUID(rateRequest.getMarkerId())),
+                                    session.getUser()),
+                                rateRequest.getRate());
+                            return Mono.just(ReplyBase.success("rate updated"));
+                        } catch (NotFoundException e) {
+                            markerService.addRate(
+                                markerService.getMarkerById(UUIDUtils.parseUUID(rateRequest.getMarkerId())),
+                                session.getUser(),
+                                rateRequest.getRate());
+                            return Mono.just(ReplyBase.success("rate added"));
+                        }
+                    })
+            );
+    }
+
+    @Getter
+    @RequiredArgsConstructor
+    public static class RateRequest {
+        private final String markerId;
+
+        //@Range(min=0, max=5)
+        //todo: validate rate (0, 0.5, 1, ..., 4.5, 5) maybe with custom validator
+        private final double rate;
     }
 
     @Getter
@@ -77,6 +116,8 @@ public class MarkerController extends AbstractController {
         private final double lat;
         @NotNull
         private final double lng;
+        @NotNull
+        private final double rate;
     }
 
 }

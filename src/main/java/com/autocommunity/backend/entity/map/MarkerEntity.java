@@ -8,6 +8,8 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -50,5 +52,8 @@ public class MarkerEntity {
     @NotNull
     private double lng;
 
-    //todo: coordinates. postgis in my opinion
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "marker_id")
+    private Set<MarkerRateEntity> rates = new HashSet<>();
 }
