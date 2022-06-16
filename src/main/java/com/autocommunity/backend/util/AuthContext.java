@@ -16,18 +16,19 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthContext {
     private final SessionService sessionService;
+    private final Boolean httpsEnabled;
 
     private static final String SESSION_COOKIE_NAME = "SESSION";
     public void attach(ServerWebExchange webExchange, SessionEntity session) {
+        var cookie = ResponseCookie.from(SESSION_COOKIE_NAME, session.getSession())
+            .maxAge(Duration.ofMillis(session.getExpirationTime().getTime() - session.getCreationTime().getTime()).toSeconds())
+            .path("/")
+            .secure(false)
+            .httpOnly(true);
+        if (httpsEnabled)
+            cookie = cookie.sameSite("None").secure(true);
         webExchange.getResponse().addCookie(
-                ResponseCookie.from(SESSION_COOKIE_NAME, session.getSession())
-                    .maxAge(Duration.ofMillis(session.getExpirationTime().getTime() - session.getCreationTime().getTime()).toSeconds())
-                    .path("/")
-                    .secure(false)
-                    .httpOnly(true)
-                    .sameSite("None")
-                    .secure(true)
-                    .build()
+            cookie.build()
         );
     }
 
