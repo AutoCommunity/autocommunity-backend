@@ -10,7 +10,7 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 public class WebConfig {
     @Bean
     public WebFluxConfigurer corsConfigurer(
-        @Value("${front.address}") String frontAddress
+        @Value("${web.front-address}") String frontAddress
     ) {
         return new WebFluxConfigurer() {
             @Override
@@ -18,5 +18,12 @@ public class WebConfig {
                 registry.addMapping("/**").allowedOrigins(frontAddress).allowCredentials(true);
             }
         };
+    }
+
+    @Bean
+    public Boolean httpsEnabled(
+        @Value("${web.https-enabled}") Boolean httpsEnabled
+    ) {
+        return httpsEnabled;
     }
 }
