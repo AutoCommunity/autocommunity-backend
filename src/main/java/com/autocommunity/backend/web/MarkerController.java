@@ -20,6 +20,8 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequestMapping(path = "/api/markers")
 @RestController
@@ -30,7 +32,7 @@ public class MarkerController extends AbstractController {
     private final MarkerService markerService;
     private final AuthContext authContext;
 
-    @GetMapping(path = "/get", produces = "application/json")
+    @GetMapping(path = "/get/all", produces = "application/json")
     public Flux<MarkerDTO> getMarkers() {
         return markerService.getMarkers().map(markerEntity ->
             MarkerDTO.builder()
@@ -39,7 +41,22 @@ public class MarkerController extends AbstractController {
                 .lat(markerEntity.getLat())
                 .lng(markerEntity.getLng())
                 .markerType(markerEntity.getMarkerType())
+                .build()
+        );
+    }
+
+    @GetMapping(path = "/get")
+    public Mono<MarkerDTOFull> getMarkerById(@RequestParam String markerId) {
+        return Mono.just(markerService.getMarkerById(UUIDUtils.parseUUID(markerId))).map(markerEntity ->
+            MarkerDTOFull.builder()
+                .id(markerEntity.getId().toString())
+                .name(markerEntity.getName())
+                .lat(markerEntity.getLat())
+                .lng(markerEntity.getLng())
+                .markerType(markerEntity.getMarkerType())
                 .rate(markerEntity.getRates().stream().mapToDouble(MarkerRateEntity::getRate).average().orElse(0))
+                .rateCnt(markerEntity.getRates().size())
+                .events(markerEntity.getEvents().stream().map(EventController::entityToDTO).collect(Collectors.toSet()))
                 .build()
         );
     }
@@ -116,8 +133,27 @@ public class MarkerController extends AbstractController {
         private final double lat;
         @NotNull
         private final double lng;
-        @NotNull
-        private final double rate;
     }
 
+    @RequiredArgsConstructor
+    @Getter
+    @Builder
+    private static class MarkerDTOFull {
+        @NotNull
+        private final String id;
+        @NotEmpty
+        private final String name;
+        @NotNull
+        private final MarkerEntity.MarkerType markerType;
+        @NotNull
+        private final double lat;
+        @NotNull
+        private final double lng;
+        @NotNull
+        private final double rate;
+        @NotNull
+        private final int rateCnt;
+        @NotNull
+        private final Set<EventController.EventDTO> events;
+    }
 }
