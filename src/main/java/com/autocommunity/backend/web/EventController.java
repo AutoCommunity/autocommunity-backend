@@ -142,7 +142,7 @@ public class EventController extends AbstractController {
         private final List<String> visitorIds;
     }
 
-    private static EventDTO entityToDTO(EventEntity event) {
+    public static EventDTO entityToDTO(EventEntity event) {
         return EventDTO.builder()
             .id(event.getId().toString())
             .startDate(event.getStartDate())

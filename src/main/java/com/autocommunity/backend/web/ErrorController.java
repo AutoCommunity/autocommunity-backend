@@ -1,6 +1,7 @@
 package com.autocommunity.backend.web;
 
 import com.autocommunity.backend.exception.BadRequestException;
+import com.autocommunity.backend.exception.NotFoundException;
 import com.autocommunity.backend.exception.UnauthenticatedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,8 @@ public class ErrorController extends AbstractController {
                 .map(fieldError -> fieldError.getField() + " " + fieldError.getDefaultMessage())
                 .orElse("Validation error");
             return ResponseEntity.badRequest().body(errorMsg);
+        } else if (e instanceof NotFoundException) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
         else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

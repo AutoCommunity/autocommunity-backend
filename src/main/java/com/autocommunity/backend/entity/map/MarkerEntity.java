@@ -55,5 +55,9 @@ public class MarkerEntity {
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "marker_id")
+    private Set<EventEntity> events = new HashSet<>();
+
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "marker_id")
     private Set<MarkerRateEntity> rates = new HashSet<>();
 }
