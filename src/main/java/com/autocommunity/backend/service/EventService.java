@@ -28,7 +28,7 @@ public class EventService {
 
     @Transactional(readOnly = true)
     public List<EventEntity> getAllEvents() {
-        return eventRepository.findAll();
+        return eventRepository.findAllByOrderByStartDateAsc();
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -61,7 +61,7 @@ public class EventService {
 
     @Transactional(readOnly = true)
     public Flux<EventEntity> getPublicEventsByMarker(UUID markerId) {
-        return Flux.fromIterable(eventRepository.findByMarkerIdAndPrivacyType(markerId, EventEntity.PrivacyType.PUBLIC));
+        return Flux.fromIterable(eventRepository.findByMarkerIdAndPrivacyTypeOrderByStartDateAsc(markerId, EventEntity.PrivacyType.PUBLIC));
     }
 
 }

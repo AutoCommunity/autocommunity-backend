@@ -8,6 +8,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface EventRepository extends CrudRepository<EventEntity, UUID> {
-    List<EventEntity> findAll();
-    List<EventEntity> findByMarkerIdAndPrivacyType(@NotNull UUID marker_id, EventEntity.@NotNull PrivacyType privacyType);
+    List<EventEntity> findAllByOrderByStartDateAsc();
+    List<EventEntity> findByMarkerIdAndPrivacyTypeOrderByStartDateAsc(@NotNull UUID marker_id, EventEntity.@NotNull PrivacyType privacyType);
 }
