@@ -8,6 +8,7 @@ import com.autocommunity.backend.exception.NotFoundException;
 import com.autocommunity.backend.service.MarkerService;
 import com.autocommunity.backend.util.AuthContext;
 import com.autocommunity.backend.util.UUIDUtils;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,7 @@ public class MarkerController extends AbstractController {
                 .lat(markerEntity.getLat())
                 .lng(markerEntity.getLng())
                 .markerType(markerEntity.getMarkerType())
+                .address(markerEntity.getAddress())
                 .build()
         );
     }
@@ -59,6 +61,7 @@ public class MarkerController extends AbstractController {
                 .rateCnt(markerEntity.getRates().size())
                 .events(markerEntity.getEvents().stream().map(EventController::entityToDTO).collect(Collectors.toSet()))
                 .owner(Optional.ofNullable(markerEntity.getOwner()).map(UserEntity::getUsername).orElse(null))
+                .address(markerEntity.getAddress())
                 .build()
         );
     }
@@ -68,7 +71,7 @@ public class MarkerController extends AbstractController {
         return authContext.isUserAuthorised(webExchange)
             .doOnNext(
                 session ->
-                    markerService.addMarker(marker.getName(), marker.getLat(), marker.getLng(), marker.getMarkerType(), session.getUser())
+                    markerService.addMarker(marker.getName(), marker.getLat(), marker.getLng(), marker.getMarkerType(), session.getUser(), marker.getAddress())
             ).then(
                 Mono.just(ReplyBase.success("marker added"))
             );
@@ -129,6 +132,8 @@ public class MarkerController extends AbstractController {
         private final double lat;
         @NotNull
         private final double lng;
+        @NotNull
+        private final String address;
     }
 
     @RequiredArgsConstructor
@@ -145,6 +150,8 @@ public class MarkerController extends AbstractController {
         private final double lat;
         @NotNull
         private final double lng;
+        @NotNull
+        private final String address;
     }
 
     @RequiredArgsConstructor
@@ -168,5 +175,8 @@ public class MarkerController extends AbstractController {
         @NotNull
         private final Set<EventController.EventDTO> events;
         private final String owner;
+
+        @NotNull
+        private final String address;
     }
 }

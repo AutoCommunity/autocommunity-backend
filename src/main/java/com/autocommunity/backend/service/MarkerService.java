@@ -25,7 +25,7 @@ public class MarkerService {
     private final MarkerRateRepository markerRateRepository;
 
     @Transactional(rollbackFor = Throwable.class)
-    public void addMarker(String name, double lat, double lng, MarkerEntity.MarkerType markerType, UserEntity owner) {
+    public void addMarker(String name, double lat, double lng, MarkerEntity.MarkerType markerType, UserEntity owner, String address) {
         var markerEntity = MarkerEntity.builder()
             .name(name)
             .lat(lat)
@@ -33,6 +33,7 @@ public class MarkerService {
             .markerType(markerType)
             .owner(owner)
             .status(MarkerEntity.Status.ACTIVE)
+            .address(address)
             .build();
         log.info("created marker with id: {}", markerEntity.getId());
         markerRepository.save(markerEntity);
