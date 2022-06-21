@@ -3,6 +3,7 @@ package com.autocommunity.backend.web;
 
 import com.autocommunity.backend.entity.map.MarkerEntity;
 import com.autocommunity.backend.entity.map.MarkerRateEntity;
+import com.autocommunity.backend.entity.user.UserEntity;
 import com.autocommunity.backend.exception.NotFoundException;
 import com.autocommunity.backend.service.MarkerService;
 import com.autocommunity.backend.util.AuthContext;
@@ -11,7 +12,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.validator.constraints.Range;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -57,6 +58,7 @@ public class MarkerController extends AbstractController {
                 .rate(markerEntity.getRates().stream().mapToDouble(MarkerRateEntity::getRate).average().orElse(0))
                 .rateCnt(markerEntity.getRates().size())
                 .events(markerEntity.getEvents().stream().map(EventController::entityToDTO).collect(Collectors.toSet()))
+                .owner(Optional.ofNullable(markerEntity.getOwner()).map(UserEntity::getUsername).orElse(null))
                 .build()
         );
     }
@@ -64,12 +66,12 @@ public class MarkerController extends AbstractController {
     @PostMapping(path = "/add")
     public Mono<ReplyBase> addMarker(@RequestBody @Valid CreateMarkerRequest marker, ServerWebExchange webExchange) {
         return authContext.isUserAuthorised(webExchange)
-            .then(
-                Mono.defer(() -> {
-                    markerService.addMarker(marker.getName(), marker.getLat(), marker.getLng(), marker.getMarkerType());
-                    return Mono.just(ReplyBase.success("marker added"));
-                }
-            ));
+            .doOnNext(
+                session ->
+                    markerService.addMarker(marker.getName(), marker.getLat(), marker.getLng(), marker.getMarkerType(), session.getUser())
+            ).then(
+                Mono.just(ReplyBase.success("marker added"))
+            );
     }
 
     @PostMapping(path = "/rate")
@@ -94,6 +96,16 @@ public class MarkerController extends AbstractController {
                         }
                     })
             );
+    }
+
+    @PostMapping(path= "/remove")
+    public Mono<ReplyBase> removeMarker(@RequestParam String markerId, ServerWebExchange webExchange) {
+        return authContext.isUserAuthorised(webExchange)
+            .doOnNext(
+                session ->
+                    markerService.removeMarker(UUIDUtils.parseUUID(markerId), session.getUser())
+            )
+            .then(Mono.just(ReplyBase.success("marker removed")));
     }
 
     @Getter
@@ -155,5 +167,6 @@ public class MarkerController extends AbstractController {
         private final int rateCnt;
         @NotNull
         private final Set<EventController.EventDTO> events;
+        private final String owner;
     }
 }

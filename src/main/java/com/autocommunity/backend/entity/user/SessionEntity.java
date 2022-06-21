@@ -25,7 +25,8 @@ import java.util.UUID;
 @EqualsAndHashCode
 @Table(name = "session")
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

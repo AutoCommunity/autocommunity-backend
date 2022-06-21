@@ -1,9 +1,11 @@
 package com.autocommunity.backend.entity.map;
 
+import com.autocommunity.backend.entity.user.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -15,6 +17,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "marker")
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,6 +32,11 @@ public class MarkerEntity {
         OTHER
     }
 
+    public enum Status {
+        ACTIVE,
+        DELETED
+    }
+
 
     @Id
     @GeneratedValue(generator = "UUID")
@@ -36,6 +44,10 @@ public class MarkerEntity {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     @NotNull
     private UUID id;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -52,6 +64,9 @@ public class MarkerEntity {
     @NotNull
     private double lng;
 
+    @ManyToOne
+    @JoinColumn(name = "owner")
+    private UserEntity owner;
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "marker_id")

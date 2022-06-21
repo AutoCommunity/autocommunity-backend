@@ -10,7 +10,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,12 +36,12 @@ public class UserController extends AbstractController {
     public Mono<ReplyBase> auth(@RequestBody @Valid AuthRequest request, ServerWebExchange webExchange) {
         return
             Mono.just(loginOrRegister(request.getUsername(), request.getPassword()))
-            .doOnNext(session -> authContext.attach(webExchange, session))
-            .flatMap(session -> Mono.just(
-                session.getFirstRegistration() ?
-                    ReplyBase.success("Successfully registered.") :
-                    ReplyBase.success("Successfully logged in.")
-            ));
+                .doOnNext(session -> authContext.attach(webExchange, session))
+                .flatMap(session -> Mono.just(
+                    session.getFirstRegistration() ?
+                        ReplyBase.success("Successfully registered.") :
+                        ReplyBase.success("Successfully logged in.")
+                ));
     }
 
     @PostMapping("/logout")
@@ -61,8 +60,11 @@ public class UserController extends AbstractController {
     public Mono<UserConfigDTO> getUserConfig(ServerWebExchange webExchange) {
         return authContext.isUserAuthorised(webExchange)
             .map(SessionEntity::getUser)
-            .map(user -> UserConfigDTO.builder()
-                .username(user.getUsername()).build());
+            .map(user ->
+                UserConfigDTO.builder()
+                    .username(user.getUsername())
+                    .build()
+            );
     }
 
     private SessionEntity loginOrRegister(String login, String password) {

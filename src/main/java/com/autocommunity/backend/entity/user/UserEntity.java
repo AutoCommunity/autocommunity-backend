@@ -17,7 +17,8 @@ import java.util.UUID;
 @EqualsAndHashCode
 @Table(name = "user_t")
 @Entity
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
