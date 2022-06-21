@@ -56,6 +56,9 @@ public class MarkerEntity {
     @Column(name = "name")
     private String name;
 
+    @Column(name = "address")
+    private String address;
+
     @Column(name = "lat")
     @NotNull
     private double lat;
