@@ -44,6 +44,7 @@ public class MarkerController extends AbstractController {
                 .lng(markerEntity.getLng())
                 .markerType(markerEntity.getMarkerType())
                 .address(markerEntity.getAddress())
+                .rate(markerEntity.getRates().stream().mapToDouble(MarkerRateEntity::getRate).average().orElse(0))
                 .build()
         );
     }
@@ -152,6 +153,8 @@ public class MarkerController extends AbstractController {
         private final double lng;
         @NotNull
         private final String address;
+        @NotNull
+        private final double rate;
     }
 
     @RequiredArgsConstructor
