@@ -1,2 +1,2 @@
 ALTER TABLE marker
-    ADD address VARCHAR(255);
+    ADD address VARCHAR;
